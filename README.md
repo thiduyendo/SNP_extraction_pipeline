@@ -657,7 +657,7 @@ to help document the computational environment and citation information.
 A complete example using the included test data is:
 
 ```bash
-git clone <REPOSITORY-URL>
+git clone https://github.com/thiduyendo/SNP_extraction_pipeline.git
 
 cd SNP_extraction_pipeline
 
