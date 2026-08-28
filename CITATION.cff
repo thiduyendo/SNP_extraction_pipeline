@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: "SNP Extraction Pipeline for Pseudomonas aeruginosa"
+message: "If you use this pipeline, please cite this software repository."
+type: software
+
+authors:
+  - family-names: "Do"
+    given-names: "Thi Duyen"
+    orcid: "https://orcid.org/0000-0001-7361-292X"
+
+repository-code: "https://github.com/thiduyendo/SNP_extraction_pipeline"
+
+license: MIT
+
+version: "1.0.0"
+
+abstract: >
+  A Snakemake-based workflow for extracting nucleotide-level SNP
+  features from clustered and aligned protein sequences of
+  Pseudomonas aeruginosa. The workflow combines protein clustering
+  with CD-HIT, multiple sequence alignment with MAFFT, nucleotide
+  sequence mapping, SNP extraction, and antibiotic-specific
+  phenotype matrix generation.
