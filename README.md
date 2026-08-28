@@ -1,4 +1,4 @@
-# SNP Extraction Pipeline for *Pseudomonas aeruginosa*
+# SNP Extraction Pipeline for Bacteria
 
 A reproducible Snakemake pipeline for extracting nucleotide-level SNP features from *Pseudomonas aeruginosa* protein sequences.
 
