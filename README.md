@@ -1,53 +1,86 @@
 # SNP Extraction Pipeline for Bacteria
 
-A reproducible Snakemake pipeline for extracting nucleotide-level SNP features from *Pseudomonas aeruginosa* protein sequences.
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
+[![Snakemake](https://img.shields.io/badge/Snakemake-workflow-blue.svg)](https://snakemake.readthedocs.io/)
 
-The pipeline combines protein sequences, clusters homologous proteins with CD-HIT, aligns clustered proteins with MAFFT, maps protein alignments back to nucleotide coding sequences (FFN), and extracts variable nucleotide positions as SNP features.
+A reproducible Snakemake pipeline for extracting nucleotide-level SNP features
+from *Pseudomonas aeruginosa* protein sequences.
 
-The final SNP features are stored in HDF5 format and can optionally be filtered by antibiotic phenotype.
+The workflow combines protein clustering with CD-HIT, multiple sequence
+alignment with MAFFT, nucleotide sequence mapping using FFN files, SNP
+extraction, and optional antibiotic-specific phenotype filtering.
+
+![SNP Extraction Pipeline workflow](docs/workflow.png)
+
+## Pipeline at a glance
+
+| Step | Tool | Main purpose |
+|---|---|---|
+| Protein clustering | CD-HIT | Cluster homologous proteins |
+| Protein alignment | MAFFT | Align proteins within clusters |
+| Nucleotide mapping | Python | Map protein alignments to coding sequences |
+| SNP extraction | Python | Identify variable nucleotide positions |
+| Phenotype filtering | Python | Generate antibiotic-specific SNP matrices |
+
+The final SNP features are stored in HDF5 format.
+
+> **Tip:** The workflow is managed by Snakemake, so interrupted runs can be
+> resumed and completed intermediate results can be reused when they are
+> compatible with the current inputs and parameters.
+
+---
+
+## Quick start
+
+```bash
+git clone https://github.com/thiduyendo/SNP_extraction_pipeline.git
+cd SNP_extraction_pipeline
+
+conda env create -f environment.yml
+conda activate snp_pipeline
+
+# Check the workflow without running it
+snakemake -s Snakefile -n
+
+# Run the example workflow
+snakemake -s Snakefile --cores 4
+```
+
+After a successful run, the main SNP matrix is generated at:
+
+```text
+results/snp_output/all.95.0.snp.h5
+```
+
+See **[Troubleshooting](#7-troubleshooting)** for how to resume failed runs,
+reuse intermediate results, run specific targets, or force a rule to rerun.
 
 ---
 
 ## Overview
 
-The pipeline performs the following steps:
+The pipeline follows this dependency structure:
 
 ```text
-Protein FASTA files
-        │
-        ▼
-   Combine FASTA
-        │
-        ▼
-      CD-HIT
-   protein clustering
-        │
-        ├── .cdhit.faa
-        └── .cdhit.clstr
-        │
-        ▼
-      MAFFT
- protein alignment
-        │
-        ▼
-   Combine FFN files
-        │
-        ▼
- Map protein alignment
- to nucleotide sequences
-        │
-        ▼
-    SNP extraction
-        │
-        ▼
- all.<prefix>.snp.h5
-        │
-        ▼
- Phenotype filtering
-        │
-        ▼
- snp_<antibiotic>.h5
+Protein FASTA ──→ CD-HIT ──→ MAFFT ───────────────┐
+                                                   │
+FFN files ──────→ Combine FFN ────────────────────┤
+                                                   ↓
+                                      Nucleotide mapping
+                                                   ↓
+                                           SNP extraction
+                                                   ↓
+                                      all.<prefix>.snp.h5
+                                                   ↓
+                                      Phenotype filtering
+                                                   ↓
+                                      snp_<antibiotic>.h5
 ```
+
+The workflow is implemented as a Snakemake dependency graph rather than a
+strictly linear sequence. Therefore, an independent step that has already
+completed can normally be reused when the workflow is resumed.
 
 ---
 
@@ -97,6 +130,8 @@ SNP_extraction_pipeline/
 ├── README.md
 ├── CITATION.cff
 ├── .gitignore
+├── docs/
+│   └── workflow.png
 ├── scripts/
 │   ├── combine_ffn.py
 │   ├── extract_snp.py
@@ -114,6 +149,8 @@ SNP_extraction_pipeline/
 The `data/example/` directory contains a small example dataset for testing the workflow.
 
 Large experimental datasets and generated results should **not** be committed to GitHub.
+
+The `docs/workflow.png` figure provides a visual overview of the workflow and is displayed at the top of this README.
 
 ---
 
@@ -242,7 +279,7 @@ mafft:
   executable: "mafft"
 
 antibiotics:
-  - tobramycin 
+  - tobramycin
 ```
 
 ### Important
@@ -317,7 +354,7 @@ snakemake -s Snakefile -n -p
 The `-p` option prints the commands that Snakemake would execute.
 
 ---
-# 7. Troubleshooting
+# 7. Troubleshooting and resuming the workflow
 
 ## 7.1 Resume an interrupted run
 
@@ -349,6 +386,8 @@ snakemake -s Snakefile --cores 30
 ```
 
 will reuse the completed outputs and continue from the missing steps.
+
+> **Recommendation:** Do not delete completed intermediate files just to resume a failed run. Keep them in place and let Snakemake determine which jobs still need to run.
 
 ## 7.2 Run only a downstream step
 
@@ -397,6 +436,10 @@ Snakemake will use the existing outputs when they are considered up-to-date.
 **Important:** Existing intermediate files should only be reused if they were generated from compatible input data and pipeline parameters. For example, CD-HIT results generated with a different clustering threshold or a different genome dataset should not be reused.
 
 ## 7.4 Force a rule to run again
+
+Use this only when you intentionally want to regenerate an existing output.
+For most failed runs, simply rerunning Snakemake is preferable.
+
 
 If an output exists but a particular rule needs to be rerun, use `--forcerun` with the rule name.
 
@@ -825,7 +868,7 @@ data/ffn/
 Create a genome list if desired:
 
 ```text
-data/genlist.txt (This is an optional file containing a set of genome ID) 
+data/genlist.txt  # Optional file containing genome IDs
 ```
 
 ### Step 4
@@ -843,7 +886,7 @@ Update `config_PA.yaml`:
 ```yaml
 input_faa: "data/faa"
 ffn_dir: "data/ffn"
-metadata: "data/PATRIC_genomes_AMR.txt" (file containing Resistance Phenotype)`
+metadata: "data/PATRIC_genomes_AMR.txt"  # File containing resistance phenotype data
 genlist: "data/genlist.txt"
 ```
 
@@ -853,7 +896,7 @@ Select the antibiotic:
 
 ```yaml
 antibiotics:
-  - tobramycin 
+  - tobramycin
 ```
 
 ### Step 7
@@ -884,7 +927,8 @@ The pipeline reports mapping warnings when a protein sequence cannot be successf
 
 # 18. Citation
 
-If you use this pipeline in a publication, please cite the repository and the associated archived release/DOI.
+If you use this pipeline in a publication, please cite the software repository
+and the specific release used for your analysis.
 
 Citation information is provided in:
 
@@ -892,11 +936,15 @@ Citation information is provided in:
 CITATION.cff
 ```
 
-Once the repository is archived through Zenodo, the DOI for the specific release should be used when citing the version of the pipeline used for an analysis.
+GitHub uses `CITATION.cff` to provide citation information for the repository.
+Once a release is archived through Zenodo, the DOI for that specific release
+should be used when available.
+
+For reproducibility, we recommend citing the exact release/version used in the
+analysis rather than only the current state of the repository.
 
 ---
 
 # License
 
 See the repository license for terms of use.
-
