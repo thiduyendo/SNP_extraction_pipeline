@@ -739,7 +739,7 @@ Select the antibiotic:
 
 ```yaml
 antibiotics:
-  - meropenem
+  - tobramycin 
 ```
 
 ### Step 7

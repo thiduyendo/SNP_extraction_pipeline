@@ -89,7 +89,7 @@ rule run_mafft:
 rule combine_ffn:
     input:
         ffn_files = lambda wildcards: sorted(
-            glob.glob(f"{FFN_DIR_INPUT}/*.PATRIC.ffn")
+            glob.glob(f"{FFN_DIR_INPUT}/*.ffn")
         )
 
     output:

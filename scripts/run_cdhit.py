@@ -20,6 +20,26 @@ def read_genlist(path):
             genome_ids.add(genome_id)
     return genome_ids
 
+def get_genome_id(filename):
+    """
+    Extract genome ID from a FASTA filename.
+
+    Supports:
+        genome1.PATRIC.faa
+        genome1.faa
+    """
+
+    basename = os.path.basename(filename)
+
+    if basename.endswith(".PATRIC.faa"):
+        return basename[:-len(".PATRIC.faa")]
+
+    if basename.endswith(".faa"):
+        return basename[:-len(".faa")]
+
+    return os.path.splitext(basename)[0]
+
+
 def combine_fasta(faa_files, output_file):
     """Combine FASTA files and prepend genome ID to each header."""
     with open(output_file, "w") as out:
@@ -134,9 +154,7 @@ def main():
 
         faa_files = [
             faa for faa in faa_files
-            if os.path.basename(faa).replace(
-                ".PATRIC.faa", ""
-            ) in genome_ids
+            if get_genome_id(faa) in genome_ids
         ]
 
         if not faa_files:
