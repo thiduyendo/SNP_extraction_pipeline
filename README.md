@@ -140,7 +140,7 @@ The filename is used to determine the genome ID.
 For example:
 
 ```text
-1402486.3.PATRIC.faa
+Either 1402486.3.PATRIC.faa or 1402486.3.faa
 ```
 
 corresponds to:
@@ -182,10 +182,10 @@ The combined FFN file is then used to map the protein alignment back to nucleoti
 Example:
 
 ```text
-1402486.3
-1402487.3
-1402488.3
-1402489.3
+1402486.3.fna
+1402487.3.fna
+1402488.3.fna
+1402489.3.fna
 ```
 
 The genome list is optional.
@@ -242,7 +242,7 @@ mafft:
   executable: "mafft"
 
 antibiotics:
-  - meropenem
+  - tobramycin 
 ```
 
 ### Important
@@ -317,26 +317,140 @@ snakemake -s Snakefile -n -p
 The `-p` option prints the commands that Snakemake would execute.
 
 ---
+# 7. Troubleshooting
 
-# 7. Run only a specific output
+## 7.1 Resume an interrupted run
 
-For example, to generate the complete SNP HDF5 file:
+Snakemake can resume an interrupted or failed workflow without rerunning completed steps.
+
+If the pipeline stops because of an error, fix the underlying problem and rerun:
+
+```bash
+snakemake -s Snakefile --cores 30
+```
+
+Snakemake checks the existing output files and executes only the jobs that are missing or need to be updated.
+
+For example, if CD-HIT and FFN preparation completed successfully but MAFFT failed:
+
+```text
+Combine FASTA       ✓
+CD-HIT               ✓
+MAFFT                ✗
+Combine FFN          ✓
+SNP extraction       ✗
+Phenotype filtering  ✗
+```
+
+after fixing the MAFFT problem, rerunning:
+
+```bash
+snakemake -s Snakefile --cores 30
+```
+
+will reuse the completed outputs and continue from the missing steps.
+
+## 7.2 Run only a downstream step
+
+A specific output can be requested directly. Snakemake will automatically determine which dependencies are required.
+
+For example:
 
 ```bash
 snakemake -s Snakefile \
     results/snp_output/all.95.0.snp.h5 \
-    --cores 1
+    --cores 30
 ```
 
-To generate an antibiotic-specific SNP matrix:
+If the upstream CD-HIT and MAFFT outputs already exist and are up-to-date, they will not be regenerated.
+
+Similarly, an antibiotic-specific SNP matrix can be generated with:
 
 ```bash
 snakemake -s Snakefile \
     results/snp_output/snp_meropenem.h5 \
-    --cores 1
+    --cores 30
 ```
 
-Snakemake automatically determines which previous steps are required.
+## 7.3 Reuse existing intermediate files
+
+Intermediate results can be reused to avoid repeating computationally expensive steps.
+
+For example, if the CD-HIT and MAFFT results already exist:
+
+```text
+results/cdhit/all.95.0.cdhit.faa
+results/cdhit/all.95.0.cdhit.clstr
+results/mafft/all.95.0.aligned.faa
+```
+
+you can request the downstream SNP output:
+
+```bash
+snakemake -s Snakefile \
+    results/snp_output/all.95.0.snp.h5 \
+    --cores 30
+```
+
+Snakemake will use the existing outputs when they are considered up-to-date.
+
+**Important:** Existing intermediate files should only be reused if they were generated from compatible input data and pipeline parameters. For example, CD-HIT results generated with a different clustering threshold or a different genome dataset should not be reused.
+
+## 7.4 Force a rule to run again
+
+If an output exists but a particular rule needs to be rerun, use `--forcerun` with the rule name.
+
+For example, if the MAFFT rule is named `run_mafft`:
+
+```bash
+snakemake -s Snakefile \
+    --forcerun run_mafft \
+    --cores 30
+```
+
+A dry run is recommended before forcing a rule:
+
+```bash
+snakemake -s Snakefile \
+    --forcerun run_mafft \
+    -n -p
+```
+
+## 7.5 Check what Snakemake will run
+
+Before executing the workflow, use a dry run:
+
+```bash
+snakemake -s Snakefile -n
+```
+
+For detailed commands:
+
+```bash
+snakemake -s Snakefile -n -p
+```
+
+This is particularly useful when resuming a failed workflow or reusing intermediate files.
+
+## 7.6 Starting from an existing intermediate result
+
+The pipeline can be continued from an existing intermediate result if that result matches the expected output of the corresponding workflow step.
+
+For example, if a valid aligned protein FASTA already exists at:
+
+```text
+results/mafft/all.95.0.aligned.faa
+```
+
+the downstream SNP extraction can be generated without repeating CD-HIT or MAFFT:
+
+```bash
+snakemake -s Snakefile \
+    results/snp_output/all.95.0.snp.h5 \
+    --cores 30
+```
+
+The existing alignment must correspond to the same genome dataset, cluster definitions, and expected file format used by the downstream SNP extraction step.
 
 ---
 
@@ -689,7 +803,7 @@ To run the pipeline on your own *Pseudomonas aeruginosa* dataset:
 Prepare protein FASTA files:
 
 ```text
-my_data/faa/
+data/faa/
 ├── genome1.PATRIC.faa
 ├── genome2.PATRIC.faa
 └── ...
@@ -700,7 +814,7 @@ my_data/faa/
 Prepare corresponding FFN files:
 
 ```text
-my_data/ffn/
+data/ffn/
 ├── genome1.PATRIC.ffn
 ├── genome2.PATRIC.ffn
 └── ...
@@ -711,7 +825,7 @@ my_data/ffn/
 Create a genome list if desired:
 
 ```text
-my_data/genlist.txt
+data/genlist.txt (This is an optional file containing a set of genome ID) 
 ```
 
 ### Step 4
@@ -719,7 +833,7 @@ my_data/genlist.txt
 Prepare phenotype metadata:
 
 ```text
-my_data/PATRIC_genomes_AMR.txt
+data/PATRIC_genomes_AMR.txt
 ```
 
 ### Step 5
@@ -727,10 +841,10 @@ my_data/PATRIC_genomes_AMR.txt
 Update `config_PA.yaml`:
 
 ```yaml
-input_faa: "my_data/faa"
-ffn_dir: "my_data/ffn"
-metadata: "my_data/PATRIC_genomes_AMR.txt"
-genlist: "my_data/genlist.txt"
+input_faa: "data/faa"
+ffn_dir: "data/ffn"
+metadata: "data/PATRIC_genomes_AMR.txt" (file containing Resistance Phenotype)`
+genlist: "data/genlist.txt"
 ```
 
 ### Step 6

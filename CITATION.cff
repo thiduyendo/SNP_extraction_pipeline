@@ -1,6 +1,9 @@
-cff-version: 1.2.0
+cff-version: 1.0.0
+
 title: "SNP Extraction Pipeline for Pseudomonas aeruginosa"
+
 message: "If you use this pipeline, please cite this software repository."
+
 type: software
 
 authors:
@@ -8,11 +11,15 @@ authors:
     given-names: "Thi Duyen"
     orcid: "https://orcid.org/0000-0001-7361-292X"
 
+version: "1.0.0"
+
+date-released: "2026-08-29"
+
+license: "MIT"
+
 repository-code: "https://github.com/thiduyendo/SNP_extraction_pipeline"
 
-license: MIT
-
-version: "1.0.0"
+url: "https://github.com/thiduyendo/SNP_extraction_pipeline"
 
 abstract: >
   A Snakemake-based workflow for extracting nucleotide-level SNP
