@@ -11,8 +11,6 @@ The workflow combines protein clustering with CD-HIT, multiple sequence
 alignment with MAFFT, nucleotide sequence mapping using FFN files, SNP
 extraction, and optional antibiotic-specific phenotype filtering.
 
-[![SNP Extraction Pipeline workflow](docs/workflow.png)]
-
 ## Pipeline at a glance
 
 | Step | Tool | Main purpose |
