@@ -1,0 +1,27 @@
+name: snp_extraction_pipeline
+
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  # Python
+  - python=3.9
+
+  # Workflow
+  - snakemake
+
+  # Bioinformatics tools
+  - cd-hit
+  - mafft
+
+  # Python packages
+  - pandas
+  - numpy
+  - h5py
+  - tables
+  - biopython
+
+  # Utilities
+  - pyyaml
