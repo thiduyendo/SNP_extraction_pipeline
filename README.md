@@ -1,6 +1,5 @@
 # SNP Extraction Pipeline for Bacteria
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Snakemake](https://img.shields.io/badge/Snakemake-workflow-blue.svg)](https://snakemake.readthedocs.io/)
 
@@ -941,6 +940,4 @@ analysis rather than only the current state of the repository.
 
 ---
 
-# License
 
-See the repository license for terms of use.
