@@ -402,7 +402,7 @@ Similarly, an antibiotic-specific SNP matrix can be generated with:
 
 ```bash
 snakemake -s Snakefile \
-    results/snp_output/snp_meropenem.h5 \
+    results/snp_output/snp_tobramycin.h5 \
     --cores 30
 ```
 
@@ -513,7 +513,7 @@ results/
 │
 └── snp_output/
     ├── all.95.0.snp.h5
-    └── snp_meropenem.h5
+    └── snp_tobramycin.h5
 ```
 
 Generated results are excluded from Git using `.gitignore`.
