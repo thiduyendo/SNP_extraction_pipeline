@@ -925,18 +925,9 @@ The pipeline reports mapping warnings when a protein sequence cannot be successf
 If you use this pipeline in a publication, please cite the software repository
 and the specific release used for your analysis.
 
-Citation information is provided in:
+Citation information is provided in the CITATION.cff file. For archived releases, please use the corresponding Zenodo DOI to cite the specific version used in your analysis.
 
-```text
-CITATION.cff
-```
-
-GitHub uses `CITATION.cff` to provide citation information for the repository.
-Once a release is archived through Zenodo, the DOI for that specific release
-should be used when available.
-
-For reproducibility, we recommend citing the exact release/version used in the
-analysis rather than only the current state of the repository.
+For reproducibility, we recommend citing the exact release or version used in your analysis rather than the current state of the repository.
 
 ---
 

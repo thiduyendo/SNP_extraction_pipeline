@@ -15,7 +15,7 @@ version: "1.0.0"
 
 date-released: "2026-08-29"
 
-license: "MIT"
+DOI: "10.5281/zenodo.22161844"
 
 repository-code: "https://github.com/thiduyendo/SNP_extraction_pipeline"
 
