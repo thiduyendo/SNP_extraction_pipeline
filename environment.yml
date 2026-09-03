@@ -1,4 +1,4 @@
-name: snp_extraction_pipeline
+name: snp_pipeline
 
 channels:
   - conda-forge
